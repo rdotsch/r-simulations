@@ -14,14 +14,15 @@
 
 library(tidyverse)
 library(gganimate)
+library(animation)
 
 # --- SETTINGS -----------------------------------------------------------------
 
 # Settings for simulation of one-sample t-test (test against H0: m = 0 )
-m    <- 0.2    # Population mean
+m    <- 0.5    # Population mean
 sd   <- 1      # Population standard deviation
-N    <- 2:300  # Sequence of sample sizes
-iter <- 10000  # Number of iterations for each sample size
+N    <- 2:100  # Sequence of sample sizes
+iter <- 20000  # Number of iterations for each sample size
 
 # --- SIMULATION ---------------------------------------------------------------
 
@@ -52,12 +53,13 @@ results <- data.frame(i=rep(1:iter, times=length(N)), N=rep(N, each=iter)) %>%
 # note: gganimate for me only worked with theme_set(theme_bw())
 theme_set(theme_bw())
 
-title.position <- max(results$p.bin.percentage) + 3
+max.percentage <- max(results$p.bin.percentage)
 p <- ggplot(results, aes(x=p.bin, y=p.bin.percentage, group=N, frame=N)) + 
   geom_line() + 
   geom_point() +
-  geom_label(aes(label=paste0(p.bin.percentage, '%')), nudge_y=0.5) +
-  geom_text(aes(label=paste0('N=', N, '; ', power, '% Power'), x=0.03, y=title.position)) +
+  geom_label(aes(label=paste0(p.bin.percentage, '%')), nudge_y=max.percentage / 20) +
+  geom_text(aes(label=paste0('N=', N, '; ', power, '% Power'), x=0.03, y=max.percentage + 5)) +
   labs(x='p-values\n(rounded up)', y='% of p-values') 
 
-gganimate(p, title_frame = F, filename = 'pcurvebypower.gif')
+ani.options(interval=0.25)
+gganimate(p, filename = 'pcurvebypower.gif', title_frame = F)
